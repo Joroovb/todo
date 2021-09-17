@@ -40,7 +40,7 @@ impl TodoList {
     }
 
     fn write(&self) {
-        let json = serde_json::to_string(&self).unwrap();
+        let json = serde_json::to_string_pretty(&self).unwrap();
         fs::write(".todos", json).expect("Unable to write file");
     }
 
@@ -80,6 +80,7 @@ enum Command {
     Get,
     Clear,
     Clean,
+    Help,
     Add(String),
     Done(usize),
     Remove(usize),
@@ -108,10 +109,10 @@ fn main() {
         "get" => Command::Get,
         "clear" => Command::Clear,
         "clean" => Command::Clean,
-        "add" => Command::Add(args[2].clone()),
+        "add" => Command::Add(args[2..].join(" ")),
         "done" => Command::Done(args[2].parse().expect("Error converting to int")),
         "remove" => Command::Remove(args[2].parse().expect("Error converting to int")),
-        _ => panic!("Provide argument"),
+        _ => Command::Help,
     };
 
     match command {
@@ -124,6 +125,9 @@ fn main() {
             todo_list.clean_completed();
             todo_list.write();
             todo_list.print();
+        }
+        Command::Help => {
+            help();
         }
         Command::Add(task) => {
             todo_list.add_to_list(task);
